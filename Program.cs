@@ -43,7 +43,7 @@ namespace ConsoleClient
             writer.Write(0x11); //version packet
             writer.Write(3); //version 0.03
 
-            reader.ReadUInt32();//packet ID (join packet: 16
+            reader.ReadUInt32();//packet ID (join packet: 16)
             reader.ReadUInt32();//unknown
             guid = reader.ReadUInt64(); //GUID
             reader.ReadBytes(0x1168);//junk
@@ -162,9 +162,8 @@ namespace ConsoleClient
                         break;
 
                     default:
-                        //DebugLog("Unkonw opcode:   " + ID);
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.Write("mapseed: " + reader.ReadUInt32());
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write("Unknown opcode: " + reader.ReadUInt32());
                         Console.ForegroundColor = ConsoleColor.White;
                         break;
                 }
