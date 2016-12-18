@@ -13,6 +13,7 @@ namespace ConsoleClient
         BinaryWriter writer;
         BinaryReader reader;
         ulong guid;
+        string[] UserNames = new string[32768];
 
         static void Main(string[] args)
         {
@@ -49,7 +50,7 @@ namespace ConsoleClient
             reader.ReadBytes(0x1168);//junk
 
             writer.Write(0); //packet ID
-            byte[] uncompressed = File.ReadAllBytes("c:/dev/StreamReader/entityData.dat");
+            byte[] uncompressed = File.ReadAllBytes("c:/dev/ServerChatConsole/ServerChatConsole/entityData.dat");
             uncompressed[0] = (byte)guid;
             Array.Copy(nameBytes, 0, uncompressed, 0x1122, nameBytes.Length);
             byte[] compressed = zlib.Compress(uncompressed);
@@ -103,7 +104,8 @@ namespace ConsoleClient
             byte[] uncompressed;
             ulong sender;
             int length;
-            string message;
+            string text;
+            int x = 0;
 
             while (true)
             {
@@ -114,6 +116,13 @@ namespace ConsoleClient
                         size = reader.ReadInt32();
                         compressed = reader.ReadBytes(size);
                         uncompressed = zlib.Uncompress(compressed);
+                        ulong bitfield = BitConverter.ToUInt64(uncompressed, 8);
+                        if (bitfield == 281474976710655)
+                        {
+                            sender = BitConverter.ToUInt64(uncompressed, 0);
+                            text = Encoding.UTF8.GetString(uncompressed, 0x1122, 16);
+                            UserNames[sender] = text;
+                        }
                         break;
 
                     case 2:
@@ -132,11 +141,11 @@ namespace ConsoleClient
                     case 10:
                         sender = reader.ReadUInt64();
                         length = reader.ReadInt32();
-                        message = Encoding.Unicode.GetString(reader.ReadBytes(length * 2));
+                        text = Encoding.Unicode.GetString(reader.ReadBytes(length * 2));
                         if (sender == 0)
                         {
                             Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.WriteLine(message);
+                            Console.WriteLine(text);
                             Console.ForegroundColor = ConsoleColor.White;
                         }
                         else if (sender == guid)
@@ -144,20 +153,20 @@ namespace ConsoleClient
                             Console.ForegroundColor = ConsoleColor.Magenta;
                             Console.Write(sender + ": ");
                             Console.ForegroundColor = ConsoleColor.White;
-                            Console.WriteLine(message);
+                            Console.WriteLine(text);
                         }
                         else
                         {
                             Console.ForegroundColor = ConsoleColor.Cyan;
-                            Console.Write(sender + ": ");
+                            Console.Write(UserNames[sender] + ": ");
                             Console.ForegroundColor = ConsoleColor.White;
-                            Console.WriteLine(message);
+                            Console.WriteLine(text);
                         }
                         break;
 
                     case 15:
                         Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.Write("mapseed: " + reader.ReadUInt32());
+                        Console.WriteLine("mapseed: " + reader.ReadUInt32());
                         Console.ForegroundColor = ConsoleColor.White;
                         break;
 
