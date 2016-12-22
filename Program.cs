@@ -13,7 +13,7 @@ namespace ConsoleClient
         BinaryWriter writer;
         BinaryReader reader;
         ulong guid;
-        string[] UserNames = new string[32768];
+        string[] UserNames = new string[1024];
 
         static void Main(string[] args)
         {
@@ -50,7 +50,7 @@ namespace ConsoleClient
             reader.ReadBytes(0x1168);//junk
 
             writer.Write(0); //packet ID
-            byte[] uncompressed = File.ReadAllBytes("c:/dev/ServerChatConsole/ServerChatConsole/entityData.dat");
+            byte[] uncompressed = ServerChatConsole.Properties.Resources.entityData;
             uncompressed[0] = (byte)guid;
             Array.Copy(nameBytes, 0, uncompressed, 0x1122, nameBytes.Length);
             byte[] compressed = zlib.Compress(uncompressed);
@@ -165,9 +165,7 @@ namespace ConsoleClient
                         break;
 
                     case 15:
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.WriteLine("mapseed: " + reader.ReadUInt32());
-                        Console.ForegroundColor = ConsoleColor.White;
+                        reader.ReadUInt32(); //mapseed
                         break;
 
                     default:
